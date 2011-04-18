@@ -458,14 +458,18 @@ public class FileUtils {
     
     public static ArrayList<String> GetScanIdsByType(String host, String user, String pwd, String imageSessionId, String imageScanType) {
         ArrayList<String> rtn = null;
+        String[] types= imageScanType.split(",");
         try {
         	XnatImagesessiondataBean imageSession  = (XnatImagesessiondataBean) new XMLSearch(host, user, pwd).getBeanFromHost(imageSessionId, true);
-        	ArrayList<XnatImagescandataBean> imageScan = getScanByType(imageSession, imageScanType);
-        	if (imageScan.size() == 0)  return rtn;
-        	rtn = new ArrayList<String>();
-        	for (int i =0; i < imageScan.size(); i++) {
-        		rtn.add(imageScan.get(i).getId());
-        		System.out.println("Found scan " + imageScan.get(i).getId());
+        	for (int i =0; i < types.length; i++) {
+        		String scanType = types[i].trim();
+            	ArrayList<XnatImagescandataBean> imageScan = getScanByType(imageSession, scanType);
+            	if (imageScan.size() == 0)  continue;
+            	if (rtn==null) rtn = new ArrayList<String>();
+            	for (int j =0; j < imageScan.size(); j++) {
+            		rtn.add(imageScan.get(j).getId());
+            		System.out.println("Found scan " + imageScan.get(j).getId());
+            	}
         	}
         }catch(Exception e) {
         	e.printStackTrace();
@@ -760,7 +764,7 @@ public class FileUtils {
     
     public static void main(String args[]) {
        System.out.println("STARTING");
-    	GetScanIdsByType("https://localhost:8080/", "USER", "PWD",  "CNDA_E16035", "BOLD");
+    	GetScanIdsByType("https://cnda.wustl.edu/", "mohanar", "admin",  "CNDA_E23085", "CNTRACS_QA_80_n1, CNTRACS_QA_80_n2, CNTRACS_QA_10, FBIRN_QA_77_n1, FBIRN_QA_77_n2, FBIRN_QA_10, CNTRACS_QA_77");
     	System.out.println("DONE");
     	System.exit(0);
     }
