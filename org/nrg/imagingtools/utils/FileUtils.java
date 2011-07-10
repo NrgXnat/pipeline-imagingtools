@@ -18,6 +18,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
@@ -50,6 +51,7 @@ import org.nrg.xdat.bean.XnatResourcecatalogBean;
 import org.nrg.xdat.bean.XnatResourceseriesBean;
 import org.nrg.xdat.bean.base.BaseElement;
 import org.nrg.xdat.bean.reader.XDATXMLReader;
+import org.nrg.xdat.model.XnatAbstractresourceI;
 import org.nrg.xnattools.service.WebServiceClient;
 import org.nrg.xnattools.xml.XMLSearch;
 import org.xml.sax.SAXException;
@@ -130,11 +132,11 @@ public class FileUtils {
         return rtn;
     }*/
     
-    private static XnatAbstractresourceBean getFileByContent( XnatImagescandataBean imageScan, String content) {
-    	XnatAbstractresourceBean rtn = null;
+    private static XnatAbstractresourceI getFileByContent( XnatImagescandataBean imageScan, String content) {
+    	XnatAbstractresourceI rtn = null;
     	try {
 				for (int i = 0; i < imageScan.getFile().size(); i++) {
-					XnatAbstractresourceBean f = imageScan.getFile().get(i);
+					XnatAbstractresourceI f = imageScan.getFile().get(i);
 				    if (f instanceof XnatResourceBean) {
 				    	XnatResourceBean resource = (XnatResourceBean)f;
 				    	if (resource.getContent().equals(content)) {
@@ -174,11 +176,11 @@ public class FileUtils {
     	return rtn;
     }
     
-    private static XnatAbstractresourceBean getScanFile(XnatImagescandataBean imagescan) {
-    	XnatAbstractresourceBean file = null;
+    private static XnatAbstractresourceI getScanFile(XnatImagescandataBean imagescan) {
+    	XnatAbstractresourceI file = null;
     	String scanType = imagescan.getType();
     	String rawScanContentCode = scanType + "_RAW";
-    	ArrayList <XnatAbstractresourceBean> files = imagescan.getFile();
+    	List <XnatAbstractresourceI> files = imagescan.getFile();
     	if (files.size() > 0) {
 	    	if (files.size() == 1) {
 	        	file = files.get(0);
@@ -193,7 +195,7 @@ public class FileUtils {
     
     private static XnatImagescandataBean getScan(XnatImagesessiondataBean imageSession, String imageScanId) {
     	XnatImagescandataBean imageScan = null;
-    ArrayList<XnatImagescandataBean> imageScans = imageSession.getScans_scan(); 
+    List<XnatImagescandataBean> imageScans = imageSession.getScans_scan(); 
     if (imageScans != null && imageScans.size() > 0) {
         for (int i = 0; i < imageScans.size(); i++) {
             XnatImagescandataBean mrscan = imageScans.get(i); 
@@ -209,7 +211,7 @@ public class FileUtils {
     private static ArrayList<XnatImagescandataBean> getScanByType(XnatImagesessiondataBean imageSession, String imageScanType) {
     	ArrayList<XnatImagescandataBean> imageScan = new ArrayList<XnatImagescandataBean>();
     	if (imageScanType == null) return imageScan;
-    	ArrayList<XnatImagescandataBean> imageScans = imageSession.getScans_scan(); 
+    	List<XnatImagescandataBean> imageScans = imageSession.getScans_scan(); 
     if (imageScans != null && imageScans.size() > 0) {
         for (int i = 0; i < imageScans.size(); i++) {
             XnatImagescandataBean mrscan = imageScans.get(i); 
@@ -226,11 +228,11 @@ public class FileUtils {
         String rtn = null;
         try {
         	XnatPetsessiondataBean pet  = (XnatPetsessiondataBean) new XMLSearch(host, user, pwd).getBeanFromHost(imageSessionId, true);
-		   ArrayList<XnatImagescandataBean> scans = pet.getScans_scan();
+		   List<XnatImagescandataBean> scans = pet.getScans_scan();
 		   for (int i=0; i < scans.size(); i++) {
 			   XnatImagescandataBean scan = scans.get(i);
 			   if (scan.getType().equals("Dynamic emission")) {
-				   ArrayList<XnatAbstractresourceBean> files = scan.getFile();
+				   List<XnatAbstractresourceBean> files = scan.getFile();
 				   if (files.size() == 1) {
 						  rtn = getUriFromFile(files.get(0));
 				   }else {
@@ -259,7 +261,7 @@ public class FileUtils {
 	               String catalogPath = rscCatalog.getUri();
 	               if (catalogPath.endsWith("/")) catalogPath = catalogPath.substring(0,catalogPath.length()-1);
 	               CatCatalogBean catalogBean =  (CatCatalogBean)new XmlReader().getBeanFromXml(catalogPath, false);
-	               ArrayList<CatEntryBean>  catalogEntries = catalogBean.getEntries_entry();
+	               List<CatEntryBean>  catalogEntries = catalogBean.getEntries_entry();
 	               String uri = catalogEntries.get(0).getUri();
 	               int i = catalogPath.lastIndexOf("/");
 	               catalogPath = catalogPath.substring(0, i);
@@ -407,13 +409,13 @@ public class FileUtils {
         try {
         	XnatImagesessiondataBean imageSession  = (XnatImagesessiondataBean) new XMLSearch(host, user, pwd).getBeanFromHost(imageSessionId, true);
         	XnatImagescandataBean imageScan = getScan(imageSession, imageScanId);
-        	XnatAbstractresourceBean file =  getScanFile(imageScan);
+        	XnatAbstractresourceI file =  getScanFile(imageScan);
         	  if (file instanceof XnatResourcecatalogBean) {
            	   XnatResourcecatalogBean catalog = (XnatResourcecatalogBean)file;
                String catalogPath = catalog.getUri();
                if (catalogPath.endsWith("/")) catalogPath = catalogPath.substring(0,catalogPath.length()-1);
                CatDcmcatalogBean dcmCatalogBean =  (CatDcmcatalogBean)new XmlReader().getBeanFromXml(catalogPath, false);
-               ArrayList<CatEntryBean>  catalogEntries = dcmCatalogBean.getEntries_entry();
+               List<CatEntryBean>  catalogEntries = dcmCatalogBean.getEntries_entry();
                int lastIndexOfSlash = catalogPath.lastIndexOf("/");
                String uri = catalogEntries.get(0).getUri();               
                if (lastIndexOfSlash != -1) {
@@ -434,13 +436,13 @@ public class FileUtils {
         try {
         	XnatImagesessiondataBean imageSession  = (XnatImagesessiondataBean) new XMLSearch(host, user, pwd).getBeanFromHost(imageSessionId, true);
         	XnatImagescandataBean imageScan = getScan(imageSession, imageScanId);
-        	XnatAbstractresourceBean file =  getScanFile(imageScan);
+        	XnatAbstractresourceI file =  getScanFile(imageScan);
         	  if (file instanceof XnatResourcecatalogBean) {
            	   XnatResourcecatalogBean catalog = (XnatResourcecatalogBean)file;
                String catalogPath = catalog.getUri();
                if (catalogPath.endsWith("/")) catalogPath = catalogPath.substring(0,catalogPath.length()-1);
                CatDcmcatalogBean dcmCatalogBean =  (CatDcmcatalogBean)new XmlReader().getBeanFromXml(catalogPath, false);
-               ArrayList<CatEntryBean>  catalogEntries = dcmCatalogBean.getEntries_entry();
+               List<CatEntryBean>  catalogEntries = dcmCatalogBean.getEntries_entry();
                String uri = catalogEntries.get(0).getUri();
                int lastIndexOfSlash = uri.lastIndexOf("/");
                if (lastIndexOfSlash != -1) {
@@ -481,13 +483,13 @@ public class FileUtils {
         String rtn = "";
         try {
         	XnatImagescandataBean imageScan = getScan(imageSession, imageScanId);
-        	XnatAbstractresourceBean file =  getScanFile(imageScan);
+        	XnatAbstractresourceI file =  getScanFile(imageScan);
         	  if (file instanceof XnatResourcecatalogBean) {
            	   XnatResourcecatalogBean catalog = (XnatResourcecatalogBean)file;
                String catalogPath = catalog.getUri();
                if (catalogPath.endsWith("/")) catalogPath = catalogPath.substring(0,catalogPath.length()-1);
                CatDcmcatalogBean dcmCatalogBean =  (CatDcmcatalogBean)new XmlReader().getBeanFromXml(catalogPath, false);
-               ArrayList<CatEntryBean>  catalogEntries = dcmCatalogBean.getEntries_entry();
+               List<CatEntryBean>  catalogEntries = dcmCatalogBean.getEntries_entry();
                String uri = catalogEntries.get(0).getUri();
                int lastIndexOfSlash = uri.lastIndexOf("/");
                if (lastIndexOfSlash != -1) {
@@ -523,7 +525,7 @@ public class FileUtils {
         try {
         	XnatImagesessiondataBean imageSession  = (XnatImagesessiondataBean) new XMLSearch(host, user, pwd).getBeanFromHost(imageSessionId, true);
         	XnatImagescandataBean imageScan = getScan(imageSession, imageScanId);
-        	XnatAbstractresourceBean file =  getScanFile(imageScan);
+        	XnatAbstractresourceI file =  getScanFile(imageScan);
         	  if (file instanceof XnatImageresourceseriesBean) {
         		  XnatImageresourceseriesBean imgRsc = (XnatImageresourceseriesBean)file;
         		  rtn = imgRsc.getName();
@@ -538,7 +540,7 @@ public class FileUtils {
         String rtn = "";
         try {
         	XnatImagescandataBean imageScan = getScan(imageSession, imageScanId);
-        	XnatAbstractresourceBean file =  getScanFile(imageScan);
+        	XnatAbstractresourceI file =  getScanFile(imageScan);
         	  if (file instanceof XnatImageresourceseriesBean) {
         		  XnatImageresourceseriesBean imgRsc = (XnatImageresourceseriesBean)file;
         		  rtn = File.separator + imgRsc.getName();
@@ -764,7 +766,7 @@ public class FileUtils {
     
     public static void main(String args[]) {
        System.out.println("STARTING");
-    	GetScanIdsByType("https://cnda.wustl.edu/", "mohanar", "admin",  "CNDA_E23085", "CNTRACS_QA_80_n1, CNTRACS_QA_80_n2, CNTRACS_QA_10, FBIRN_QA_77_n1, FBIRN_QA_77_n2, FBIRN_QA_10, CNTRACS_QA_77");
+    	GetScanIdsByType("https://cnda.wustl.edu/", "USER", "PWD",  "CNDA_E23085", "CNTRACS_QA_80_n1, CNTRACS_QA_80_n2, CNTRACS_QA_10, FBIRN_QA_77_n1, FBIRN_QA_77_n2, FBIRN_QA_10, CNTRACS_QA_77");
     	System.out.println("DONE");
     	System.exit(0);
     }
