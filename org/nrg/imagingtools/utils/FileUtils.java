@@ -19,7 +19,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.List;
 
 import net.sf.json.JSON;
@@ -27,6 +29,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 
+import org.dcm4che2.data.DicomElement;
 import org.dcm4che2.data.DicomObject;
 import org.dcm4che2.data.Tag;
 import org.nrg.imagingtools.dicom.DicomFileReader;
@@ -55,9 +58,9 @@ import org.nrg.xdat.bean.XnatResourceBean;
 import org.nrg.xdat.bean.XnatResourcecatalogBean;
 import org.nrg.xdat.bean.XnatResourceseriesBean;
 import org.nrg.xdat.bean.base.BaseElement;
-import org.nrg.xdat.bean.reader.SRBXDATXMLReader;
 import org.nrg.xdat.bean.reader.XDATXMLReader;
 import org.nrg.xdat.model.XnatAbstractresourceI;
+import org.nrg.xdat.model.XnatQcscandataI;
 import org.nrg.xnattools.service.WebServiceClient;
 import org.nrg.xnattools.xml.XMLSearch;
 import org.xml.sax.SAXException;
@@ -181,6 +184,67 @@ public class FileUtils {
     	}
     	return rtn;
     }
+
+    private static XnatAbstractresourceI getFileLikeContent( XnatImagescandataBean imageScan, String content) {
+    	XnatAbstractresourceI rtn = null;
+    	try {
+				for (int i = 0; i < imageScan.getFile().size(); i++) {
+					XnatAbstractresourceI f = imageScan.getFile().get(i);
+				    if (f instanceof XnatResourceBean) {
+				    	XnatResourceBean resource = (XnatResourceBean)f;
+				    	if (resource.getContent().endsWith(content)) {
+				    		rtn = f;
+				    		break;
+				    	}
+				    }else if (f instanceof XnatImageresourceBean) {
+				    	XnatImageresourceBean imageResource = (XnatImageresourceBean)f;
+				    	if (imageResource.getContent().endsWith(content)) {
+				    		rtn = f;
+				    		break;
+				    	}
+				    }else if (f instanceof XnatResourceseriesBean) {
+				    	XnatResourceseriesBean resourceSeries = (XnatResourceseriesBean)f;
+				    	if (resourceSeries.getContent().endsWith(content)) {
+				    		rtn = f;
+				    		break;
+				    	}
+				    }else if (f instanceof XnatDicomseriesBean) {
+				    	XnatDicomseriesBean resourceSeries = (XnatDicomseriesBean)f;
+				    	if (resourceSeries.getContent().endsWith(content)) {
+				    		rtn = f;
+				    		break;
+				    	}
+				    }else if (f instanceof XnatResourcecatalogBean) {
+				    	XnatResourcecatalogBean resourceCat = (XnatResourcecatalogBean)f;
+				    	if (resourceCat.getContent().endsWith(content)) {
+				    		rtn = f;
+				    		break;
+				    	}
+				    }
+					
+				}
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    	}
+    	return rtn;
+    }
+
+    
+    public static String GetScanFileLabel(String host, String user, String pwd, String imageSessionId, String imageScanId) {
+        String rtn = null;
+        try {
+        	XnatImagesessiondataBean imageSession  = (XnatImagesessiondataBean) new XMLSearch(host, user, pwd).getBeanFromHost(imageSessionId, true);
+        	XnatImagescandataBean imageScan = getScan(imageSession, imageScanId);
+        	XnatAbstractresourceI file =  getScanFile(imageScan);
+        	//System.out.println("File uri " + imageSessionId + " " + imageScanId + "  " + file.getXSIType());
+        	rtn = file.getLabel();
+        }catch(Exception e) {
+        	e.printStackTrace();
+        }
+        if (rtn==null) rtn="null";
+        
+        return rtn;
+    }
     
     private static XnatAbstractresourceI getScanFile(XnatImagescandataBean imagescan) {
     	XnatAbstractresourceI file = null;
@@ -194,6 +258,8 @@ public class FileUtils {
 	        	file = getFileByContent(imagescan, rawScanContentCode);
 	        	if (file == null)
 	        		file = getFileByContent(imagescan, "RAW");
+	        	if (file ==null)
+	        		file = getFileLikeContent(imagescan, "_RAW");
 	        }
     	}
     	return file;
@@ -490,6 +556,8 @@ public class FileUtils {
         }
         return rtn;
     }
+
+
     
     private static ArrayList<XnatImagescandataBean> getScanById(XnatImagesessiondataBean imageSession, String imageScanId) {
     	ArrayList<XnatImagescandataBean> imageScan = new ArrayList<XnatImagescandataBean>();
@@ -604,48 +672,90 @@ public class FileUtils {
         return rtn;
     }
 
-    public static ArrayList<String> GetPreferredScanByManualQCQuality(String host, String user, String pwd, String imageSessionId, String quality, String tempDir, ArrayList<net.sf.saxon.tinytree.TinyNodeImpl> imageScanType) {
-        ArrayList<String> rtn = null;
+    public static String GetPreferredScanByManualQCQuality(String host, String user, String pwd, String imageSessionId, String quality, String tempDir, String rating, String ratingScaleType, ArrayList<net.sf.saxon.tinytree.TinyNodeImpl> imageScanType) {
+        String rtn = null;
+        Hashtable<String,String> scanids = null;
+        ArrayList<XnatImagescandataBean> imageScan = null;
         try {
             XnatImagesessiondataBean imageSession  = (XnatImagesessiondataBean) new XMLSearch(host, user, pwd).getBeanFromHost(imageSessionId, true);
-
-        	XMLSearch search = new XMLSearch(host, user, pwd );
-            ArrayList<String> files = search.searchAll("xnat:qcManualAssessorData.imageSession_ID",imageSessionId,"=","xnat:qcManualAssessorData",tempDir);
-        	XnatQcmanualassessordataBean latestQC = null;
-            for (int i = 0; i < files.size(); i++) {
-                String path = files.get(i);
-                try {
-                   File f = new File(path); 
-                   if (f.exists()) {
-                       path = f.getAbsolutePath();
-                   }else {
-                       f = new File(new URI(path));
-                       path = f.getAbsolutePath();
-                   }
-                }catch(Exception e) {e.printStackTrace();}
-                SRBXDATXMLReader reader = new SRBXDATXMLReader();
-                BaseElement base = reader.parse(path);
-                latestQC = (XnatQcmanualassessordataBean)base;
-                Date date = latestQC.getDate();
-        	}
-            
-        	for (int i =0; i < imageScanType.size(); i++) {
+           	for (int i =0; i < imageScanType.size(); i++) {
         		String scanType = imageScanType.get(i).getStringValue();
-            	ArrayList<XnatImagescandataBean> imageScan = getScanByType(imageSession, scanType);
+            	imageScan = getScanByType(imageSession, scanType);
             	if (imageScan.size() == 0) {
             		imageScan = getScanById(imageSession, scanType);
             		if (imageScan.size() == 0)  continue;
             	}
-            	if (rtn==null) rtn = new ArrayList<String>();
+            	if (scanids==null) scanids = new Hashtable<String,String>();
             	for (int j =0; j < imageScan.size(); j++) {
-            		if (imageScan.get(j).getQuality().equalsIgnoreCase(quality))
-            			rtn.add(imageScan.get(j).getId());
+            		scanids.put(imageScan.get(j).getId(), imageScan.get(j).getId());
             		//System.out.println("Found scan " + imageScan.get(j).getId());
             	}
         	}
+           	if (rating != null && ratingScaleType != null && !ratingScaleType.equals("")) {
+            	XMLSearch search = new XMLSearch(host, user, pwd );
+                ArrayList<String> files = search.searchAll("xnat:qcManualAssessorData.imageSession_ID",imageSessionId,"=","xnat:qcManualAssessorData",tempDir);
+            	if (files.size()>0) {
+            	XnatQcmanualassessordataBean latestQC = null;
+            	Calendar currentcal = Calendar.getInstance();
+            	boolean done = false;
+            	
+            	for (int i = 0; i < files.size(); i++) {
+                    String path = files.get(i);
+                    File f = null;
+                    try {
+                       f = new File(path); 
+                       if (f.exists()) {
+                           path = f.getAbsolutePath();
+                       }else {
+                           f = new File(new URI(path));
+                           path = f.getAbsolutePath();
+                       }
+                    }catch(Exception e) {e.printStackTrace();}
+                    XDATXMLReader reader = new XDATXMLReader();
+                    BaseElement base = reader.parse(f);
+                    XnatQcmanualassessordataBean qc = (XnatQcmanualassessordataBean)base;
+                    Date date = qc.getDate();
+                    //Get the latest manual QC
+                    //If that exists use the best from here
+                    //If no QC exists, pick the best MR by quality.
+            		if (i==0) {
+            	       	currentcal.setTime(date);
+            	       	latestQC = qc;
+            		}else {
+            			Calendar cal = Calendar.getInstance();
+            			cal.setTime(date);
+            			if (currentcal.before(cal)) {
+            				latestQC = qc;
+            				currentcal.setTime(latestQC.getDate());
+            			}
+            		}
+                }
+            	if (latestQC != null) {
+                	List<XnatQcscandataI> qcscans = latestQC.getScans_scan();
+            		for (int j=0; j < qcscans.size(); j++) {
+            			XnatQcscandataI qcscan = qcscans.get(j);
+        				if (scanids.containsKey(qcscan.getImagescanId()) ) {
+            				if (ratingScaleType.equals(qcscan.getRating_scale())) {
+            					if (rating.equals(qcscan.getRating())) {
+            						rtn = qcscan.getImagescanId();
+            						break;
+            					}
+            				}
+            			}
+            		}
+            	}
+           	}
+           	}else {
+         	for (int j =0; j < imageScan.size(); j++) {
+        		if (imageScan.get(j).getQuality().equalsIgnoreCase(quality))
+        			rtn = imageScan.get(j).getId();
+        			break;
+         	}
+         }
         }catch(Exception e) {
         	e.printStackTrace();
         }
+        System.out.println("Scan selected are: " + rtn);
         return rtn;
     }
 
@@ -936,6 +1046,65 @@ public class FileUtils {
         }
 	}
 
+    
+    public static String getTagAsInts(String dicomFilePath, String tag, int index) {
+		try {
+			DicomElement dcmElt = getTag(dicomFilePath,tag);
+			int[] ints = dcmElt.getInts(true);
+			String rtn = "" + ints[index];
+			return rtn;
+        }catch(Exception e) {
+        	e.printStackTrace();
+        	return "";
+        }
+	}
+
+    public static String getTagAsFloats(String dicomFilePath, String tag, int index) {
+		try {
+			DicomElement dcmElt = getTag(dicomFilePath,tag);
+			float[] floats = dcmElt.getFloats(true);
+			String rtn = "" + floats[index];
+			return rtn;
+        }catch(Exception e) {
+        	e.printStackTrace();
+        	return "";
+        }
+	}
+
+    public static String getTagAsString(String dicomFilePath, String tag) {
+		try {
+			DicomElement dcmElt = getTag(dicomFilePath,tag);
+			String rtn = dcmElt.getString(null, true);
+			return rtn;
+        }catch(Exception e) {
+        	e.printStackTrace();
+        	return "";
+        }
+	}
+
+    public static String getTagAsString(String dicomFilePath, String tag, int index) {
+		try {
+			DicomElement dcmElt = getTag(dicomFilePath,tag);
+			String[] rtn = dcmElt.getStrings(null, true);
+			return rtn[index];
+        }catch(Exception e) {
+        	e.printStackTrace();
+        	return "";
+        }
+	}
+    
+    public static DicomElement getTag(String dicomFilePath, String tag) {
+		try {
+			DicomFileReader dicomFileReader = new DicomFileReader(dicomFilePath);
+			DicomObject dcmObj = dicomFileReader.getDicomObject();
+			DicomElement dcmElt = dcmObj.get(Tag.toTag(tag));
+			return dcmElt;
+        }catch(IOException e) {
+        	e.printStackTrace();
+        	return null;
+        }
+	}
+    
     public static String getNYArgumentForUnpack4dfp(String dicomFilePath) {
 		try {
 			DicomFileReader dicomFileReader = new DicomFileReader(dicomFilePath);
@@ -984,9 +1153,10 @@ public class FileUtils {
 	}
     
     public static void main(String args[]) {
-       System.out.println("STARTING");
-    	//GetScanIdsByType("https://cnda.wustl.edu/", "USER", "PWD",  "CNDA_E23085", "CNTRACS_QA_80_n1, CNTRACS_QA_80_n2, CNTRACS_QA_10, FBIRN_QA_77_n1, FBIRN_QA_77_n2, FBIRN_QA_10, CNTRACS_QA_77");
-    	System.out.println("DONE");
+   /*   	String rtn = getTagAsString(args[0],"00181312");
+      	System.out.println("Tag value is " + rtn); */
+    	//String label = GetScanFileLabel("HOST","USER","PWD","CNDA_E00509","1");
+    	String label = "null";
     	System.exit(0);
     }
     

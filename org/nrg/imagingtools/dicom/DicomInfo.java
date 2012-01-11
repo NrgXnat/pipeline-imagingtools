@@ -90,7 +90,8 @@ public class DicomInfo {
                 if (tag != null) {
                     int tagIndex = rtn.indexOf(tag);
                     if (tagIndex != -1) {
-                        rtn = (rtn.substring(tagIndex).split("\n")[0]);
+                        System.out.println(rtn.substring(tagIndex));
+                    	rtn = (rtn.substring(tagIndex).split("\n")[0]);
                     }else {
                         System.err.println("Tag " + tag +" not present in the header");
                         System.exit(2);
