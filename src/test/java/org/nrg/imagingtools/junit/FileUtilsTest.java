@@ -31,7 +31,6 @@ public class FileUtilsTest {
 		Assert.assertEquals("  -nx  64 -ny 64",unpackArgs);
 		unpackArgs = FileUtils.getArgumentsForUnpack4dfp(filepaths[3]);
 		Assert.assertEquals("  -nx  112 -ny 112",unpackArgs);
-
 	}
 	
 }

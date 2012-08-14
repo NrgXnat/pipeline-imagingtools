@@ -353,10 +353,9 @@ public class FileUtils {
         
         public static String GetFile(String host, String user, String pwd,  String project, String collection, String file_label) {
         	String filename="";
-        	WebServiceClient webClient = new WebServiceClient(host, user, pwd);
         	try {
-        		ByteArrayOutputStream out = new ByteArrayOutputStream();
-
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                WebServiceClient webClient = new WebServiceClient(host, user, pwd);
                	webClient.connect("REST/projects/" + project + "/files?format=json", out);
                 ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 
@@ -393,11 +392,10 @@ public class FileUtils {
         }
         
 		public static String GetCachePath(String host, String user, String pwd,   String project) {
-	       	WebServiceClient webClient = new WebServiceClient(host, user, pwd);
 	       	String rtn = null;
         	try {
-        		ByteArrayOutputStream out = new ByteArrayOutputStream();
-
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                WebServiceClient webClient = new WebServiceClient(host, user, pwd);
                	webClient.connect("REST/projects/" + project + "/archive_spec", out);
                 ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
                 XDATXMLReader reader = new XDATXMLReader();
@@ -414,10 +412,10 @@ public class FileUtils {
         
         public static String GetColumn(String host, String user, String pwd,  String uri, String colname) {
         	String rtn="";
-        	WebServiceClient webClient = new WebServiceClient(host, user, pwd);
         	String [] columnHuntOrder = colname.split(",");
         	try {
-        		ByteArrayOutputStream out = new ByteArrayOutputStream();
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                WebServiceClient webClient = new WebServiceClient(host, user, pwd);
                	webClient.connect(uri, out);
                 ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
                 
@@ -450,11 +448,10 @@ public class FileUtils {
         
         public static boolean FileExists(String host, String user, String pwd,  String project, String collection, String file_name) {
         	boolean exists=false;
-        	WebServiceClient webClient = new WebServiceClient(host, user, pwd);
         	try {
         		ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-               	webClient.connect("REST/projects/" + project + "/files?format=json", out);
+                WebServiceClient webClient = new WebServiceClient(host, user, pwd);
+                webClient.connect("REST/projects/" + project + "/files?format=json", out);
                 ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 
                	
