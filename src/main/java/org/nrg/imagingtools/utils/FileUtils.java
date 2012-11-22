@@ -35,9 +35,9 @@ import org.dcm4che2.data.Tag;
 import org.nrg.imagingtools.dicom.DicomFileReader;
 import org.nrg.imagingtools.dicom.DistortionCorrected;
 import org.nrg.imagingtools.dicom.SiemensMosaicInfoExtractor;
+import org.nrg.pipeline.xmlbeans.catalog.Catalog.Entries;
 import org.nrg.pipeline.xmlbeans.catalog.DCMCatalogDocument;
 import org.nrg.pipeline.xmlbeans.catalog.Entry;
-import org.nrg.pipeline.xmlbeans.catalog.Catalog.Entries;
 import org.nrg.pipeline.xmlreader.XmlReader;
 import org.nrg.plexiViewer.Reader.IFHReader;
 import org.nrg.xdat.bean.ArcProjectBean;
@@ -541,7 +541,7 @@ public class FileUtils {
     
     
     public static ArrayList<String> GetScanIdsByType(String host, String user, String pwd, String imageSessionId, ArrayList<net.sf.saxon.tinytree.TinyNodeImpl> imageScanType) {
-    	      ArrayList<String> rtn = null;
+    	      ArrayList<String> rtn = new ArrayList<String>();
         try {
         	XnatImagesessiondataBean imageSession  = (XnatImagesessiondataBean) new XMLSearch(host, user, pwd).getBeanFromHost(imageSessionId, true);
         	for (int i =0; i < imageScanType.size(); i++) {
@@ -549,6 +549,7 @@ public class FileUtils {
         		String[] scanTypes = scanType.split(",");
         		for (int k=0; k< scanTypes.length; k++) {
         			String scan_type = scanTypes[k].trim();
+        			System.out.println("Scantype is " + scan_type);
                 	ArrayList<XnatImagescandataBean> imageScan = getScanByType(imageSession, scan_type);
                 	if (imageScan.size() == 0)  continue;
                 	if (rtn==null) rtn = new ArrayList<String>();
@@ -584,28 +585,9 @@ public class FileUtils {
     
     
     public static String FilterScansFromTypeByQuality_GetFirst(String host, String user, String pwd, String imageSessionId, String quality, ArrayList<net.sf.saxon.tinytree.TinyNodeImpl> imageScanType) {
-        ArrayList<String> rtn = null;
         String firstUsableScanId = null;
-        try {
-        	XnatImagesessiondataBean imageSession  = (XnatImagesessiondataBean) new XMLSearch(host, user, pwd).getBeanFromHost(imageSessionId, true);
-        	for (int i =0; i < imageScanType.size(); i++) {
-        		String scanType = imageScanType.get(i).getStringValue();
-        		String[] scan_types = scanType.split(",");
-        		for (int k=0; k< scan_types.length; k++) {
-        			String scan_type = scan_types[k].trim();
-                	ArrayList<XnatImagescandataBean> imageScan = getScanByType(imageSession, scan_type);
-                	if (imageScan.size() == 0) {
-                		imageScan = getScanById(imageSession, scan_type);
-                		if (imageScan.size() == 0)  continue;
-                	}
-                	if (rtn==null) rtn = new ArrayList<String>();
-                	for (int j =0; j < imageScan.size(); j++) {
-                		if (imageScan.get(j).getQuality().equalsIgnoreCase(quality))
-                			rtn.add(imageScan.get(j).getId());
-                		//System.out.println("Found scan " + imageScan.get(j).getId());
-                	}
-        		}
-        	}
+        try{
+    	ArrayList<String> rtn = FilterScansFromTypeByQuality(host,user,pwd,imageSessionId,quality,imageScanType);
         	if (rtn.size() > 0) {
         		firstUsableScanId = rtn.get(0);
         	}
@@ -660,8 +642,15 @@ public class FileUtils {
 
     
     public static ArrayList<String> FilterScansFromTypeByQuality(String host, String user, String pwd, String imageSessionId, String quality, ArrayList<net.sf.saxon.tinytree.TinyNodeImpl> imageScanType) {
-        ArrayList<String> rtn = null;
+        ArrayList<String> rtn = new ArrayList<String>();
+        if (imageScanType.size()==0) return rtn;
+        Hashtable<String,String> qualityHash = new Hashtable<String,String>();
+        
         try {
+        	String[] qualityList = quality.split(",");
+        	for (int i=0; i< qualityList.length;i++) {
+        		qualityHash.put(qualityList[i], "1");
+        	}
         	XnatImagesessiondataBean imageSession  = (XnatImagesessiondataBean) new XMLSearch(host, user, pwd).getBeanFromHost(imageSessionId, true);
         	for (int i =0; i < imageScanType.size(); i++) {
         		String scanType = imageScanType.get(i).getStringValue().trim();
@@ -675,7 +664,7 @@ public class FileUtils {
                 	}
                 	if (rtn==null) rtn = new ArrayList<String>();
                 	for (int j =0; j < imageScan.size(); j++) {
-                		if (imageScan.get(j).getQuality().equalsIgnoreCase(quality))
+                		if (qualityHash.containsKey(imageScan.get(j).getQuality()))
                 			rtn.add(imageScan.get(j).getId());
                 		//System.out.println("Found scan " + imageScan.get(j).getId());
                 	}
@@ -687,6 +676,8 @@ public class FileUtils {
         return rtn;
     }
 
+    
+    
     public static String GetPreferredScanByManualQCQuality(String host, String user, String pwd, String imageSessionId, String quality, String tempDir, String rating, String ratingScaleType, ArrayList<net.sf.saxon.tinytree.TinyNodeImpl> imageScanType) {
         String rtn = null;
         Hashtable<String,String> scanids = null;
@@ -1180,8 +1171,8 @@ public class FileUtils {
     public static void main(String args[]) {
    /*   	String rtn = getTagAsString(args[0],"00181312");
       	System.out.println("Tag value is " + rtn); */
-    	String label = GetFile("HOST","USER","PWD","INTR_CIN_QC","validation_xnat_mrSessionData","v1.1");
-    	System.out.println("Get Column " + label);
+    	//boolean label = GetScanIdsByType("HOST","USER","PWD","XNATID","dMRI");
+    	//System.out.println("Get Column " + label);
     	//String label = "";
     	System.exit(0);
     }
