@@ -676,7 +676,48 @@ public class FileUtils {
         return rtn;
     }
 
+  
     
+
+    public static List<String> FilterScansFromTypeByQuality(String host, String user, String pwd, String imageSessionId, String quality, ArrayList<net.sf.saxon.tinytree.TinyNodeImpl> imageScanType, int returnQuantity) {
+        ArrayList<String> rtn = new ArrayList<String>();
+        if (imageScanType.size()==0) return rtn;
+        Hashtable<String,String> qualityHash = new Hashtable<String,String>();
+        
+        try {
+        	String[] qualityList = quality.split(",");
+        	for (int i=0; i< qualityList.length;i++) {
+        		qualityHash.put(qualityList[i], "1");
+        	}
+        	XnatImagesessiondataBean imageSession  = (XnatImagesessiondataBean) new XMLSearch(host, user, pwd).getBeanFromHost(imageSessionId, true);
+        	for (int i =0; i < imageScanType.size(); i++) {
+        		String scanType = imageScanType.get(i).getStringValue().trim();
+        		String[] scanTypes = scanType.split(",");
+        		for (int k=0; k<scanTypes.length; k++) {
+        			String scan_type= scanTypes[k].trim();
+        			ArrayList<XnatImagescandataBean> imageScan = getScanByType(imageSession, scan_type);
+                	if (imageScan.size() == 0) {
+                		imageScan = getScanById(imageSession, scan_type);
+                		if (imageScan.size() == 0)  continue;
+                	}
+                	if (rtn==null) rtn = new ArrayList<String>();
+                	for (int j =0; j < imageScan.size(); j++) {
+                		if (qualityHash.containsKey(imageScan.get(j).getQuality()))
+                			rtn.add(imageScan.get(j).getId());
+                		//System.out.println("Found scan " + imageScan.get(j).getId());
+                	}
+        		}
+        	}
+        }catch(Exception e) {
+        	e.printStackTrace();
+        }
+    	if (returnQuantity < rtn.size()) {
+           return rtn.subList(0, returnQuantity);
+    	}else  {
+    		return rtn;
+    	}
+    }
+
     
     public static String GetPreferredScanByManualQCQuality(String host, String user, String pwd, String imageSessionId, String quality, String tempDir, String rating, String ratingScaleType, ArrayList<net.sf.saxon.tinytree.TinyNodeImpl> imageScanType) {
         String rtn = null;
