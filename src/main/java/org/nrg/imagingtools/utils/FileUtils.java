@@ -300,7 +300,26 @@ public class FileUtils {
      return imageScan;
     }
     
-  
+    private static ArrayList<XnatImagescandataBean> getScanBySeriesDescription(XnatImagesessiondataBean imageSession, String imageScanSeriesDescription) {
+    	ArrayList<XnatImagescandataBean> imageScan = new ArrayList<XnatImagescandataBean>();
+    	if (imageScanSeriesDescription == null) return imageScan;
+    	List<XnatImagescandataBean> imageScans = imageSession.getScans_scan(); 
+    	String[] scanTypes = imageScanSeriesDescription.trim().split(",");
+    	Hashtable scanTypeHash = new Hashtable();
+    	for (int k=0; k< scanTypes.length; k++) {
+    		scanTypeHash.put(scanTypes[k], "1");
+    	}
+    	if (imageScans != null && imageScans.size() > 0) {
+    		for (int i = 0; i < imageScans.size(); i++) {
+	            XnatImagescandataBean mrscan = imageScans.get(i); 
+	            if (scanTypeHash.containsKey(mrscan.getSeriesDescription())) {
+	            	imageScan.add(mrscan);
+	            }
+            }
+        }
+     return imageScan;
+    }
+      
     public static String GetPathToDynamicEmission(String host, String user, String pwd, String imageSessionId) {
         String rtn = null;
         try {
@@ -711,7 +730,50 @@ public class FileUtils {
         }catch(Exception e) {
         	e.printStackTrace();
         }
-    	if (returnQuantity < rtn.size()) {
+        if (returnQuantity < 0)
+        	return rtn;
+        else if (returnQuantity < rtn.size()) {
+           return rtn.subList(0, returnQuantity);
+    	}else  {
+    		return rtn;
+    	}
+    }
+
+    public static List<String> FilterScansFromSeriesDescriptionByQuality(String host, String user, String pwd, String imageSessionId, String quality, ArrayList<net.sf.saxon.tinytree.TinyNodeImpl> imageScanSeriesDescription, int returnQuantity) {
+        ArrayList<String> rtn = new ArrayList<String>();
+        if (imageScanSeriesDescription.size()==0) return rtn;
+        Hashtable<String,String> qualityHash = new Hashtable<String,String>();
+        
+        try {
+        	String[] qualityList = quality.split(",");
+        	for (int i=0; i< qualityList.length;i++) {
+        		qualityHash.put(qualityList[i], "1");
+        	}
+        	XnatImagesessiondataBean imageSession  = (XnatImagesessiondataBean) new XMLSearch(host, user, pwd).getBeanFromHost(imageSessionId, true);
+        	for (int i =0; i < imageScanSeriesDescription.size(); i++) {
+        		String scanType = imageScanSeriesDescription.get(i).getStringValue().trim();
+        		String[] scanTypes = scanType.split(",");
+        		for (int k=0; k<scanTypes.length; k++) {
+        			String scan_type= scanTypes[k].trim();
+        			ArrayList<XnatImagescandataBean> imageScan = getScanBySeriesDescription(imageSession, scan_type);
+                	if (imageScan.size() == 0) {
+                		imageScan = getScanById(imageSession, scan_type);
+                		if (imageScan.size() == 0)  continue;
+                	}
+                	if (rtn==null) rtn = new ArrayList<String>();
+                	for (int j =0; j < imageScan.size(); j++) {
+                		if (qualityHash.containsKey(imageScan.get(j).getQuality()))
+                			rtn.add(imageScan.get(j).getId());
+                		//System.out.println("Found scan " + imageScan.get(j).getId());
+                	}
+        		}
+        	}
+        }catch(Exception e) {
+        	e.printStackTrace();
+        }
+        if (returnQuantity < 0)
+        	return rtn;
+        else if (returnQuantity < rtn.size()) {
            return rtn.subList(0, returnQuantity);
     	}else  {
     		return rtn;
