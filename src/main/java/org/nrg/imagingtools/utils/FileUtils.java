@@ -61,6 +61,7 @@ import org.nrg.xdat.bean.base.BaseElement;
 import org.nrg.xdat.bean.reader.XDATXMLReader;
 import org.nrg.xdat.model.XnatAbstractresourceI;
 import org.nrg.xdat.model.XnatQcscandataI;
+import org.nrg.xnattools.SessionManager;
 import org.nrg.xnattools.service.WebServiceClient;
 import org.nrg.xnattools.xml.XMLSearch;
 import org.xml.sax.SAXException;
@@ -1303,6 +1304,17 @@ public class FileUtils {
 		}
     }
     
+    public static String getJSESSION(String dummy) {
+    	String rtn = null;
+    	try {
+    		//Assumed that the SessionManager has been inited already
+    		rtn = SessionManager.GetInstance().getJSESSION();
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    	}
+    	return rtn;
+    }
+    
     public static String getMosaicTRofSliceQueryXNAT(String tr_vol, String host, String user, String pwd, String imageSessionId, String imageScanId) {
     	String rtn = "0";
 		try {
@@ -1325,6 +1337,17 @@ public class FileUtils {
 		}catch(Exception e) {
 			return null;
 		}
+    }
+    
+    public static String GetClosestInAcquisitionTime(String host, String user, String pwd, String imageSessionId, String inscanId, String closestScanType) {
+    	String rtn = null;
+    	try {
+    		XnatImagesessiondataBean imageSession  = (XnatImagesessiondataBean) new XMLSearch(host, user, pwd).getBeanFromHost(imageSessionId, true);
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    	}
+    	
+    	return rtn;
     }
     
 }
