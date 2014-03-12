@@ -440,7 +440,7 @@ public class FileUtils {
                 ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
                 
                 String jsonTxt = org.apache.commons.io.IOUtils.toString( in);
-                System.out.println(jsonTxt);
+                System.out.println(uri + " JSONTXT " + jsonTxt);
                 JSONObject jsonObj = null;
                 JSON json = JSONSerializer.toJSON( jsonTxt );
                  if (json instanceof JSONObject){
@@ -669,7 +669,7 @@ public class FileUtils {
         try {
         	String[] qualityList = quality.split(",");
         	for (int i=0; i< qualityList.length;i++) {
-        		qualityHash.put(qualityList[i], "1");
+        		qualityHash.put(qualityList[i].toUpperCase(), "1");
         	}
         	XnatImagesessiondataBean imageSession  = (XnatImagesessiondataBean) new XMLSearch(host, user, pwd).getBeanFromHost(imageSessionId, true);
         	for (int i =0; i < imageScanType.size(); i++) {
@@ -684,7 +684,7 @@ public class FileUtils {
                 	}
                 	if (rtn==null) rtn = new ArrayList<String>();
                 	for (int j =0; j < imageScan.size(); j++) {
-                		if (qualityHash.containsKey(imageScan.get(j).getQuality()))
+                		if (qualityHash.containsKey(imageScan.get(j).getQuality().toUpperCase()))
                 			rtn.add(imageScan.get(j).getId());
                 		//System.out.println("Found scan " + imageScan.get(j).getId());
                 	}
@@ -707,7 +707,7 @@ public class FileUtils {
         try {
         	String[] qualityList = quality.split(",");
         	for (int i=0; i< qualityList.length;i++) {
-        		qualityHash.put(qualityList[i], "1");
+        		qualityHash.put(qualityList[i].toUpperCase(), "1");
         	}
         	XnatImagesessiondataBean imageSession  = (XnatImagesessiondataBean) new XMLSearch(host, user, pwd).getBeanFromHost(imageSessionId, true);
         	for (int i =0; i < imageScanType.size(); i++) {
@@ -722,7 +722,7 @@ public class FileUtils {
                 	}
                 	if (rtn==null) rtn = new ArrayList<String>();
                 	for (int j =0; j < imageScan.size(); j++) {
-                		if (qualityHash.containsKey(imageScan.get(j).getQuality()))
+                		if (qualityHash.containsKey(imageScan.get(j).getQuality().toUpperCase()))
                 			rtn.add(imageScan.get(j).getId());
                 		//System.out.println("Found scan " + imageScan.get(j).getId());
                 	}
@@ -748,7 +748,7 @@ public class FileUtils {
         try {
         	String[] qualityList = quality.split(",");
         	for (int i=0; i< qualityList.length;i++) {
-        		qualityHash.put(qualityList[i], "1");
+        		qualityHash.put(qualityList[i].toUpperCase(), "1");
         	}
         	XnatImagesessiondataBean imageSession  = (XnatImagesessiondataBean) new XMLSearch(host, user, pwd).getBeanFromHost(imageSessionId, true);
         	for (int i =0; i < imageScanSeriesDescription.size(); i++) {
@@ -763,7 +763,7 @@ public class FileUtils {
                 	}
                 	if (rtn==null) rtn = new ArrayList<String>();
                 	for (int j =0; j < imageScan.size(); j++) {
-                		if (qualityHash.containsKey(imageScan.get(j).getQuality()))
+                		if (qualityHash.containsKey(imageScan.get(j).getQuality().toUpperCase()))
                 			rtn.add(imageScan.get(j).getId());
                 		//System.out.println("Found scan " + imageScan.get(j).getId());
                 	}
