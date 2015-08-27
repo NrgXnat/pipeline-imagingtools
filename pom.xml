@@ -17,6 +17,11 @@
     <dependencies>
 
         <dependency>
+            <groupId>org.nrg.xnat.pipeline</groupId>
+            <artifactId>xnat_tools</artifactId>
+            <version>1.6.5-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.nrg</groupId>
             <artifactId>plexiviewer</artifactId>
         </dependency>
@@ -142,7 +147,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
-                <version>2.3.1</version>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
