@@ -24,6 +24,8 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
@@ -31,8 +33,6 @@ import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.dcm4che2.data.DicomElement;
 import org.dcm4che2.data.DicomObject;
 import org.dcm4che2.data.Tag;
@@ -482,7 +482,7 @@ public class FileUtils {
             System.out.println(uri + " JSONTXT " + jsonTxt);
 
             ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode response = objectMapper.readTree(jsonTxt);
+            JsonNode     response     = objectMapper.readTree(jsonTxt);
 
             if (response != null && response.has("ResultSet")) {
                 JsonNode resultArray = response.get("ResultSet").get("Result");
@@ -490,8 +490,8 @@ public class FileUtils {
                     for (int i=0; i < resultArray.size(); i++) {
                         JsonNode result = resultArray.get(i);
                         JsonNode resultCol = result.get(column.trim());
-                        if (resultCol != null && StringUtils.isNotBlank(resultCol.getTextValue())) {
-                            returnList.add(i, resultCol.getTextValue());
+                        if (resultCol != null && StringUtils.isNotBlank(resultCol.textValue())) {
+                            returnList.add(i, resultCol.textValue());
                         }
                     }
                 }
