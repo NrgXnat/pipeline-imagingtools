@@ -15,7 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
-import org.nrg.plexiViewer.utils.UnzipFile;
+import org.nrg.xnat.plexiviewer.utils.UnzipFile;
 
 public class DicomInfo {
     

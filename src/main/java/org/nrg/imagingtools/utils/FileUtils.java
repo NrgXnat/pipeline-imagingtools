@@ -43,7 +43,7 @@ import org.nrg.pipeline.xmlbeans.catalog.Catalog.Entries;
 import org.nrg.pipeline.xmlbeans.catalog.DCMCatalogDocument;
 import org.nrg.pipeline.xmlbeans.catalog.Entry;
 import org.nrg.pipeline.xmlreader.XmlReader;
-import org.nrg.plexiViewer.Reader.IFHReader;
+import org.nrg.xnat.plexiviewer.reader.IFHReader;
 import org.nrg.xdat.bean.ArcProjectBean;
 import org.nrg.xdat.bean.CatCatalogBean;
 import org.nrg.xdat.bean.CatDcmcatalogBean;

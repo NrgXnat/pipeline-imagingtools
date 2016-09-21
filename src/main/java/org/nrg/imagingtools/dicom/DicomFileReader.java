@@ -15,7 +15,7 @@ import java.util.Random;
 import org.dcm4che2.data.BasicDicomObject;
 import org.dcm4che2.data.DicomObject;
 import org.dcm4che2.io.DicomInputStream;
-import org.nrg.plexiViewer.utils.UnzipFile;
+import org.nrg.xnat.plexiviewer.utils.UnzipFile;
 
 public class DicomFileReader {
 	
