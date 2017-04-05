@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.nrg</groupId>
         <artifactId>parent</artifactId>
-        <version>1.7.0</version>
+        <version>1.7.2</version>
     </parent>
 
     <groupId>org.nrg.xnat.pipeline</groupId>
@@ -26,7 +26,7 @@
         </dependency>
         <dependency>
             <groupId>org.nrg.xnat.pipeline</groupId>
-            <artifactId>xnat_tools</artifactId>
+            <artifactId>xnat-tools</artifactId>
         </dependency>
         <dependency>
             <groupId>org.nrg.xnat</groupId>
@@ -143,14 +143,34 @@
 
     <repositories>
         <repository>
-            <id>org.nrg.maven.artifacts.snapshot</id>
-            <name>XNAT Snapshot Maven Repo</name>
-            <url>http://nrgxnat.artifactoryonline.com/nrgxnat/libs-snapshot</url>
+            <id>XNAT Library</id>
+            <name>XNAT Release Maven Library</name>
+            <url>https://nrgxnat.jfrog.io/nrgxnat/libs-release-local</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>fail</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+                <updatePolicy>never</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
         </repository>
         <repository>
-            <id>org.nrg.maven.artifacts.release</id>
-            <name>XNAT Release Maven Repo</name>
-            <url>http://nrgxnat.artifactoryonline.com/nrgxnat/libs-release</url>
+            <id>XNAT Snapshot Library</id>
+            <name>XNAT Snapshot Maven Library</name>
+            <url>https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot-local</url>
+            <releases>
+                <enabled>false</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+                <checksumPolicy>fail</checksumPolicy>
+            </snapshots>
         </repository>
     </repositories>
 
