@@ -158,6 +158,11 @@
             </snapshots>
         </repository>
         <repository>
+            <id>XNAT External Library</id>
+            <name>XNAT Release Maven Library</name>
+            <url>https://nrgxnat.jfrog.io/nrgxnat/libs-release</url>
+        </repository>
+        <repository>
             <id>XNAT Snapshot Library</id>
             <name>XNAT Snapshot Maven Library</name>
             <url>https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot-local</url>
