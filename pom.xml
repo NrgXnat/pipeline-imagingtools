@@ -25,6 +25,10 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.nrg.xnat</groupId>
+            <artifactId>xnat-data-models</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.nrg.xnat.pipeline</groupId>
             <artifactId>xnat-tools</artifactId>
         </dependency>
