@@ -10,6 +10,7 @@
 
     <groupId>org.nrg.xnat.pipeline</groupId>
     <artifactId>imagingtools</artifactId>
+    <version>1.7.3</version>
 
     <name>XNAT Pipeline Imaging Tools</name>
 
