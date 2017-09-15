@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.nrg</groupId>
         <artifactId>parent</artifactId>
-        <version>1.7.3-SNAPSHOT</version>
+        <version>1.7.3</version>
     </parent>
 
     <groupId>org.nrg.xnat.pipeline</groupId>
@@ -32,6 +32,7 @@
         <dependency>
             <groupId>org.nrg.xnat.pipeline</groupId>
             <artifactId>xnat-tools</artifactId>
+            <version>1.7.3</version>
         </dependency>
         <dependency>
             <groupId>org.nrg.xnat</groupId>
