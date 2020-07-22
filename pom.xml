@@ -72,10 +72,16 @@
         <dependency>
             <groupId>org.apache.xmlbeans</groupId>
             <artifactId>xmlbeans-xpath</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.sf.saxon</groupId>
+                    <artifactId>saxon</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.apache.xmlbeans</groupId>
-            <artifactId>xmlbeans</artifactId>
+            <groupId>net.sourceforge.saxon</groupId>
+            <artifactId>saxon</artifactId>
         </dependency>
         <dependency>
             <groupId>dcm4che</groupId>
