@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.nrg</groupId>
         <artifactId>parent</artifactId>
-        <version>1.8.7-SNAPSHOT</version>
+        <version>1.8.8-SNAPSHOT</version>
     </parent>
 
     <groupId>org.nrg.xnat.pipeline</groupId>
